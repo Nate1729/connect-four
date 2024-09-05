@@ -4,6 +4,7 @@
 
 #define ROW_COUNT 6
 #define COLUMN_COUNT 7
+#define DEBUG 0
 
 typedef enum {
   TILE_STATE_EMPTY,
@@ -61,6 +62,28 @@ void game_state_move_column_hover(GameState *game_state, Direction dir) {
   
 }
 
+void game_state_change_turn(GameState *game_state) {
+  game_state->state ^= 1;
+}
+void game_state_drop_piece(GameState *game_state) {
+  TileState tile;
+  TileState *val;
+  unsigned r;
+  if (game_state->state & TURN_P2) 
+    tile = TILE_STATE_P2;
+  else
+    tile = TILE_STATE_P1;
+
+  for (r=ROW_COUNT-1; r>=0; r--) {
+    val = &game_state->board[r*COLUMN_COUNT + game_state->column_hover];
+    if (*val == TILE_STATE_EMPTY) {
+      *val = tile;
+      game_state_change_turn(game_state);
+      return;
+    }
+  }
+}
+
 void print_hover_piece(GameState* game_state) {
   char piece;
   if (game_state->state & TURN_P2) 
@@ -87,11 +110,15 @@ void game_loop() {
       game_state_move_column_hover(&state, LEFT);
     } else if (state.user_input == 'd') {
       game_state_move_column_hover(&state, RIGHT);
+    } else if (state.user_input == '\n') {
+      game_state_drop_piece(&state);
     }
 
     printf("\x1b[2J\x1b[H");
     
-    printf("Current input: %c\n", state.user_input);
+    if (DEBUG) {
+      printf("Current input: %c\n", state.user_input);
+    }
     if (state.state & TURN_P2) {
       printf("It's Player 2's turn!\n");
     } else {

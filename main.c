@@ -4,7 +4,7 @@
 
 #define ROW_COUNT 6
 #define COLUMN_COUNT 7
-#define DEBUG 1
+#define DEBUG 0
 
 typedef enum {
   TILE_STATE_EMPTY,
@@ -198,8 +198,7 @@ void game_loop() {
     
     print_hover_piece(&state);
     print_board(board);
-    if (state.state & (WIN_P2 | WIN_P2)) {
-      printf("I should break\n");
+    if (state.state & (WIN_P2 | WIN_P1) ) {
       break;
     }
   }

@@ -35,18 +35,34 @@ void print_board(TileState *board, unsigned rows, unsigned columns) {
   }
 }
 
-int main(void) {
+typedef enum {
+  TURN_P1=0,
+  TURN_P2=1,
+  QUIT=2
+} StateMask;
+
+typedef struct {
+  TileState *board;
+  StateMask state;
+  char user_input;
+} GameState;
+
+void game_loop() {
   TileState board[ROW_COUNT * COLUMN_COUNT] = {0};
-  int quit = 0;
-  char input = ' ';
-  
+
+  GameState state = {.board=board};
+
   enable_raw_mode();
   do {
     printf("\x1b[2J\x1b[H");
     
-    printf("Current input: %c\n\n", input);
+    printf("Current input: %c\n\n", state.user_input);
 
     print_board(board, ROW_COUNT, COLUMN_COUNT);
   }
-  while (fread(&input, 1, 1, stdin) == 1 && input != 'q');
+  while (fread(&state.user_input, 1, 1, stdin) == 1 && state.user_input != 'q');
+}
+
+int main(void) {
+  game_loop();
 }
